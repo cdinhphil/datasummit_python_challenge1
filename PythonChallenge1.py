@@ -88,6 +88,7 @@ def main():
         counter += 1
 
         if max(the_community.get_score()) == row_size:
+            the_community.find_perfect_config()
             print(the_community.get_perfect_config())
             break
 
