@@ -15,7 +15,7 @@ class TestProcessing(unittest.TestCase):
             self.assertIn(i, n)
 
     def test_fitness_score(self):
-        self.assertLessEqual(max(self.community.score), 8)
+        self.assertLessEqual(max(self.community.score), 16)
         self.assertGreaterEqual(min(self.community.score), 0)
 
     def test_get_score(self):

@@ -10,6 +10,7 @@ class Community:
         self.row_size = row_size
         self.mutationRate = mutationRate
         self.population_array = self.initial_population()
+        self.score = 0
         self.fitness_score()
         self.perfect_config = np.zeros((1, 1))
 
@@ -27,8 +28,27 @@ class Community:
     def fitness_score(self):
         # generate an array of shape (totalPopulation, 1) where each number corresponds
         # with a configuration in population array
-        # the highest possible score is the length of the configuration
-        self.score = np.apply_along_axis(lambda x: len(np.unique(x)), 1, self.population_array)
+        # the highest possible score is the length of the configuration times 2
+        # a point for each unique value and a point for each non diagonal sharing numbers
+
+        def diagonal_check(a):
+            passing = 0
+
+            for i in range(len(a)):
+                b = np.copy(a[i:])
+
+                for j in range(i, len(a)):
+                    v = a[i]
+                    b[j - i] = np.absolute(a[j] - v) - (j - i)
+                unique, counts = np.unique(b, return_counts=True)
+
+                if counts[np.where(unique == 0)][0] == 1:
+                    passing += 1
+
+            return passing
+
+        self.score = np.apply_along_axis(lambda x: len(np.unique(x)), 1, self.population_array) + \
+                     np.apply_along_axis(diagonal_check, 1, self.population_array)
 
     def get_score(self):
         return self.score
@@ -65,7 +85,7 @@ class Community:
         # should be used only when the a configuation has all unique numbers
         # otherwise send a dummy response
         try:
-            self.perfect_config = self.population_array[np.where(self.score == self.row_size)[0][0]]
+            self.perfect_config = self.population_array[np.where(self.score==self.row_size*2)[0][0]]
         except IndexError:
             self.perfect_config = np.zeros(1)
 
@@ -75,9 +95,9 @@ class Community:
 
 
 def main():
-    totalPopulation = 100
+    totalPopulation = 150
     row_size = 8
-    mutationRate = 0.05
+    mutationRate = 0.01
 
     the_community = Community(totalPopulation, row_size, mutationRate)
 
@@ -87,9 +107,14 @@ def main():
     while endless_loop:
         counter += 1
 
-        if max(the_community.get_score()) == row_size:
+        if max(the_community.get_score()) == row_size * 2:
             the_community.find_perfect_config()
             print(the_community.get_perfect_config())
+            print(f'Generation: {counter}')
+            # url='https://lf8q0kx152.execute-api.us-east-2.amazonaws.com/default/computeFitnessScore'
+            # x=requests.post(url,json={"qconfig":the_community.get_perfect_config(),"userID":843868,"githubLink":"https://github.com/cdinhphil/datasummit_python_challenge1"})
+            # print(x.text)
+
             break
 
         the_community.crossover_mutation()
