@@ -95,9 +95,9 @@ class Community:
 
 
 def main():
-    totalPopulation = 150
+    totalPopulation = 500
     row_size = 8
-    mutationRate = 0.01
+    mutationRate = 0.10
 
     the_community = Community(totalPopulation, row_size, mutationRate)
 
@@ -106,6 +106,8 @@ def main():
 
     while endless_loop:
         counter += 1
+        if counter % 100 == 0:
+            print(f'Generation: {counter} {np.mean(the_community.get_score())}')
 
         if max(the_community.get_score()) == row_size * 2:
             the_community.find_perfect_config()
@@ -120,5 +122,6 @@ def main():
         the_community.crossover_mutation()
         the_community.fitness_score()
 
+        
 if __name__ == "__main__":
     main()
